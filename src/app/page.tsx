@@ -5,6 +5,12 @@ import { auth } from '@/server/auth'
 import { FloatingNavbar } from '@/components/floating-navbar'
 import { HabitGrid } from '@/components/habit-grid'
 import { NotLoggedInStartPage } from '@/components/not-logged-in-start-page'
+import { SignInButton } from '@/components/sign-in-button'
+import { Icons } from '@/components/icons'
+import { HabitCard } from '@/components/habit-card'
+import { type Habit } from '@/server/api/routers/habit'
+import { PushNotificationManager } from '@/components/push-notification-manager'
+import { InstallPrompt } from '@/components/install-prompt'
 
 export default async function Home() {
   const session = await auth()
@@ -22,6 +28,10 @@ export default async function Home() {
           <NotLoggedInStartPage />
         )}
       </main>
+      <div>
+        <PushNotificationManager />
+        <InstallPrompt />
+      </div>
     </HydrateClient>
   )
 }
