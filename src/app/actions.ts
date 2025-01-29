@@ -4,7 +4,7 @@ import webpush, { type PushSubscription } from 'web-push'
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 webpush.setVapidDetails(
-  '<mailto:your-email@example.com>',
+  'mailto:albinfrick@proton.me',
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
   process.env.VAPID_PRIVATE_KEY!
 )
