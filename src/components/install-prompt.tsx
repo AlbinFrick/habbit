@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { Button } from './ui/button'
 
 export function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false)
