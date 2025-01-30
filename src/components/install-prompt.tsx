@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { Button } from './ui/button'
 
 export function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false)
@@ -20,7 +21,6 @@ export function InstallPrompt() {
   return (
     <div>
       <h3>Install App</h3>
-      <button>Add to Home Screen</button>
       {isIOS && (
         <p>
           To install this app on your iOS device, tap the share button

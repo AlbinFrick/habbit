@@ -18,6 +18,10 @@ export default async function Home() {
   return (
     <HydrateClient>
       <SiteHeader />
+      <div>
+        <PushNotificationManager />
+        <InstallPrompt />
+      </div>
       <main className="bg-base mx-auto flex min-h-[calc(100dvh-48px)] w-full max-w-7xl flex-col items-center">
         {session ? (
           <>
@@ -28,10 +32,6 @@ export default async function Home() {
           <NotLoggedInStartPage />
         )}
       </main>
-      <div>
-        <PushNotificationManager />
-        <InstallPrompt />
-      </div>
     </HydrateClient>
   )
 }

@@ -3,6 +3,17 @@
 import { sendNotification, subscribeUser, unsubscribeUser } from '@/app/actions'
 import { urlBase64ToUint8Array } from '@/lib/utils'
 import { useState, useEffect } from 'react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Button } from './ui/button'
 
 export function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false)
@@ -58,26 +69,46 @@ export function PushNotificationManager() {
   }
 
   return (
-    <div>
-      <h3>Push Notifications</h3>
-      {subscription ? (
-        <>
-          <p>You are subscribed to push notifications.</p>
-          <button onClick={unsubscribeFromPush}>Unsubscribe</button>
-          <input
-            type="text"
-            placeholder="Enter notification message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          <button onClick={sendTestNotification}>Send Test</button>
-        </>
-      ) : (
-        <>
-          <p>You are not subscribed to push notifications.</p>
-          <button onClick={subscribeToPush}>Subscribe</button>
-        </>
-      )}
-    </div>
+    <>
+      <AlertDialog defaultOpen={!subscription}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enable Notifications</AlertDialogTitle>
+            <AlertDialogDescription>
+              Would you like to receive notifications for your habits? This will
+              help you stay on track with your goals.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Maybe later</AlertDialogCancel>
+            <AlertDialogAction onClick={subscribeToPush}>
+              Enable notifications
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div>
+        <h3>Push Notifications</h3>
+        {subscription ? (
+          <>
+            <p>You are subscribed to push notifications.</p>
+            <Button onClick={unsubscribeFromPush}>Unsubscribe</Button>
+            <input
+              type="text"
+              placeholder="Enter notification message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <Button onClick={sendTestNotification}>Send Test</Button>
+          </>
+        ) : (
+          <>
+            <p>You are not subscribed to push notifications.</p>
+            <Button onClick={subscribeToPush}>Subscribe</Button>
+          </>
+        )}
+      </div>
+    </>
   )
 }
