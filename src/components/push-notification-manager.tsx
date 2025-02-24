@@ -20,7 +20,7 @@ export function PushNotificationManager() {
   }, [])
 
   async function registerServiceWorker() {
-    const registration = await navigator.serviceWorker.register('/sw.js', {
+    const registration = await navigator.serviceWorker.register('/sw.ts', {
       scope: '/',
       updateViaCache: 'none',
     })
@@ -37,7 +37,9 @@ export function PushNotificationManager() {
       ),
     })
     setSubscription(sub)
-    const serializedSub = JSON.parse(JSON.stringify(sub))
+    const serializedSub = JSON.parse(
+      JSON.stringify(sub)
+    ) as PushSubscription & { keys: { p256dh: string; auth: string } }
     await subscribeUser(serializedSub)
   }
 
