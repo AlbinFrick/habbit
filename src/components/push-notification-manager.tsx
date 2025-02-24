@@ -20,7 +20,7 @@ export function PushNotificationManager() {
   }, [])
 
   async function registerServiceWorker() {
-    const registration = await navigator.serviceWorker.register('/sw.ts', {
+    const registration = await navigator.serviceWorker.register('/sw.js', {
       scope: '/',
       updateViaCache: 'none',
     })
