@@ -3,16 +3,6 @@
 import { sendNotification, subscribeUser, unsubscribeUser } from '@/app/actions'
 import { urlBase64ToUint8Array } from '@/lib/utils'
 import { useState, useEffect } from 'react'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { Button } from './ui/button'
 
 export function PushNotificationManager() {
@@ -70,24 +60,6 @@ export function PushNotificationManager() {
 
   return (
     <>
-      <AlertDialog defaultOpen={!subscription}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Enable Notifications</AlertDialogTitle>
-            <AlertDialogDescription>
-              Would you like to receive notifications for your habits? This will
-              help you stay on track with your goals.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Maybe later</AlertDialogCancel>
-            <AlertDialogAction onClick={subscribeToPush}>
-              Enable notifications
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <div>
         <h3>Push Notifications</h3>
         {subscription ? (

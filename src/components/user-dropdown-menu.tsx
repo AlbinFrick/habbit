@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button'
 import { siteConfig } from '@/config/site.config'
 import { type Session } from 'next-auth'
 import { signOut } from 'next-auth/react'
+import { InstallPrompt } from './install-prompt'
+import { PushNotificationManager } from './push-notification-manager'
 
 type UserProfileSheetProps = {
   session: Session
@@ -50,8 +52,12 @@ export function UserProfileSheet({ session }: UserProfileSheetProps) {
             <p className="text-sm text-gray-500">{email}</p>
           </div>
         </div>
+        <div>
+          <PushNotificationManager />
+          <InstallPrompt />
+        </div>
         <div className="space-y-4"></div>
-        <div className="absolute bottom-6 left-6 right-6">
+        <div className="absolute right-6 bottom-6 left-6">
           <Button
             variant="destructive"
             className="w-full"
