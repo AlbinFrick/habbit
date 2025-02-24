@@ -34,9 +34,9 @@ export async function sendNotification(message: string) {
     await webpush.sendNotification(
       subscription,
       JSON.stringify({
-        title: 'Test Notification',
+        title: 'Habit Reminder',
         body: message,
-        icon: '/icon.png',
+        icon: '/rabbit.svg',
       })
     )
     return { success: true }
