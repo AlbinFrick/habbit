@@ -1,3 +1,4 @@
+'use-client'
 import { HydrateClient } from '@/trpc/server'
 import { SiteHeader } from '@/components/site-header'
 import { auth } from '@/server/auth'
