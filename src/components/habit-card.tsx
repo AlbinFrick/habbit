@@ -112,7 +112,7 @@ export const HabitCard = (props: HabitCardProps) => {
       transition={{ duration: 0.3 }}
       className={cn(
         'relative w-full overflow-clip rounded-3xl bg-white shadow-lg',
-        compactView ? 'max-w[600px] h-[180px]' : 'h-[75vh] md:h-[44rem]'
+        compactView ? 'h-[180px]' : 'h-[75vh] md:h-[44rem]'
       )}
     >
       <div

@@ -80,7 +80,7 @@ export const HabitGrid = () => {
       <LayoutGroup>
         <motion.div
           layout
-          className="sm:responsive-grid-[23rem] grid w-full items-center gap-6 px-4 md:px-11"
+          className="sm:responsive-grid-[23rem] grid w-full place-items-center gap-6 px-4 md:px-11"
         >
           {sortedHabits.map((sortedHabitItem: SortedHabitItem) => (
             <RenderHabitItem
