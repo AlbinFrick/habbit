@@ -41,6 +41,7 @@ export const RenderHabitItem: React.FC<HabitItemProps> = ({
       key={sortedHabitItem.habit.id}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      className="w-full max-w-lg"
       transition={{
         layout: { duration: 0.3 },
         opacity: { duration: 0.5 },
