@@ -1,8 +1,8 @@
 export const siteConfig = {
   name: 'Habbit',
-  description: '',
-  url: '',
+  description: 'A habit tracking app',
+  url: 'habbit.albinfrick.com',
   links: {
-    github: '',
+    github: 'https://github.com/AlbinFrick/habbit',
   },
 }

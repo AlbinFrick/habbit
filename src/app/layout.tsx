@@ -12,9 +12,9 @@ import { siteConfig } from '@/config/site.config'
 import { PostHogProvider } from './providers'
 
 export const metadata: Metadata = {
-    title: siteConfig.name,
-    description: siteConfig.description,
-    icons: [{ rel: 'icon', url: '/favicon.ico' }],
+  title: siteConfig.name,
+  description: siteConfig.description,
+  icons: [{ rel: 'icon', url: '/rabbit.svg' }],
 }
 
 const poppins = Poppins({
