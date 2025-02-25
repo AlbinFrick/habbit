@@ -1,16 +1,21 @@
 'use client'
 import React, { useState } from 'react'
-import { HabitCard } from './habit-card'
 import { api } from '@/trpc/react'
 import posthog from 'posthog-js'
 import { useToast } from '@/hooks/use-toast'
 import { LayoutGroup, motion } from 'motion/react'
+import { Icons } from './icons'
+import { RenderHabitItem, type SortedHabitItem } from './render-habit-item'
 
 export const HabitGrid = () => {
   const [faultyHabit, setFaultyHabit] = useState(-1)
   const { toast } = useToast()
 
-  const { data: habitsData } = api.habit.getHabitsWithStatus.useQuery()
+  const {
+    data: habitsData,
+    isError,
+    isLoading,
+  } = api.habit.getHabitsWithStatus.useQuery()
 
   const utils = api.useUtils()
   const completeHabit = api.habit.complete.useMutation({
@@ -28,12 +33,47 @@ export const HabitGrid = () => {
     },
   })
 
+  const sortedHabits = React.useMemo(() => {
+    if (!habitsData) return []
+
+    return habitsData
+      .map((data, i) => ({
+        ...data,
+        originalIndex: i,
+      }))
+      .sort((a, b) => {
+        // Sort by completion status (uncompleted first)
+        if (a.isCompleted && !b.isCompleted) return 1
+        if (!a.isCompleted && b.isCompleted) return -1
+        // If completion status is the same, maintain original order
+        return a.originalIndex - b.originalIndex
+      })
+  }, [habitsData])
+
   const handleComplete = (habitId: number) => {
     posthog.capture('habit-completed', { id: habitId })
     completeHabit.mutate({ habitId })
   }
 
-  if (!habitsData) return <p>Click plus button to add habits</p>
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex h-[50vh] w-full items-center justify-center"
+      >
+        <Icons.Loader className="size-10 animate-[spin_1.5s_linear_infinite]" />
+      </motion.div>
+    )
+  }
+
+  if (isError) {
+    return <p>Something went wrong when fetching your habits</p>
+  }
+
+  if (!habitsData || habitsData.length === 0) {
+    return <p>You have no habits, add one in the menu below</p>
+  }
 
   return (
     <div className="grid w-full grid-cols-1 gap-8 py-11">
@@ -42,55 +82,15 @@ export const HabitGrid = () => {
           layout
           className="sm:responsive-grid-[23rem] grid w-full items-center gap-6 px-4 md:px-11"
         >
-          {habitsData
-            .map((data, i) => ({
-              ...data,
-              originalIndex: i,
-            }))
-            .sort((a, b) => {
-              // Sort by completion status (uncompleted first)
-              if (a.isCompleted && !b.isCompleted) return 1
-              if (!a.isCompleted && b.isCompleted) return -1
-              // If completion status is the same, maintain original order
-              return a.originalIndex - b.originalIndex
-            })
-            .map(({ habit, isCompleted, completions, originalIndex }) => {
-              if (!habit) {
-                return (
-                  <p key={originalIndex}>
-                    Something went wrong when fetching this habit
-                  </p>
-                )
-              }
-              return (
-                <motion.div
-                  layout
-                  key={habit.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    layout: { duration: 0.3 },
-                    opacity: { duration: 0.5 },
-                    y: { duration: 0.5, delay: originalIndex * 0.2 },
-                  }}
-                  exit={{ opacity: 0, y: -20 }}
-                >
-                  <HabitCard
-                    habit={habit}
-                    isCompleted={isCompleted}
-                    completions={completions}
-                    onComplete={handleComplete}
-                    reset={() => {
-                      if (faultyHabit === habit.id) {
-                        setFaultyHabit(-1)
-                        return true
-                      }
-                      return false
-                    }}
-                  />
-                </motion.div>
-              )
-            })}
+          {sortedHabits.map((sortedHabitItem: SortedHabitItem) => (
+            <RenderHabitItem
+              key={sortedHabitItem.habit?.id ?? sortedHabitItem.originalIndex}
+              sortedHabitItem={sortedHabitItem}
+              handleCompleteAction={handleComplete}
+              faultyHabit={faultyHabit}
+              setFaultyHabitAction={setFaultyHabit}
+            />
+          ))}
         </motion.div>
       </LayoutGroup>
     </div>
