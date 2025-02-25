@@ -72,12 +72,7 @@ export const HabitGrid = () => {
   }
 
   if (!habitsData || habitsData.length === 0) {
-    return (
-      <p>
-        You have no habits, add one with by pressing the add button in the menu
-        below
-      </p>
-    )
+    return <p>You have no habits, add one in the menu below</p>
   }
 
   return (
