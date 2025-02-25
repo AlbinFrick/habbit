@@ -5,6 +5,7 @@ import { api } from '@/trpc/react'
 import posthog from 'posthog-js'
 import { useToast } from '@/hooks/use-toast'
 import { LayoutGroup, motion } from 'motion/react'
+import { Icons } from './icons'
 
 export const HabitGrid = () => {
   const [faultyHabit, setFaultyHabit] = useState(-1)
@@ -33,7 +34,16 @@ export const HabitGrid = () => {
     completeHabit.mutate({ habitId })
   }
 
-  if (!habitsData) return <p>Click plus button to add habits</p>
+  if (!habitsData)
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex h-[50vh] w-full items-center justify-center"
+      >
+        <Icons.Loader className="size-10 animate-[spin_1.5s_linear_infinite]" />
+      </motion.div>
+    )
 
   return (
     <div className="grid w-full grid-cols-1 gap-8 py-11">
