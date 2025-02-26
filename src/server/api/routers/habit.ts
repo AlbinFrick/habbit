@@ -45,6 +45,11 @@ export const habitRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      // First delete all completions for this habit
+      await ctx.db
+        .delete(habitCompletions)
+        .where(eq(habitCompletions.habitId, input.id))
+      // Then delete the habit itself
       await ctx.db.delete(habits).where(eq(habits.id, input.id))
     }),
 
