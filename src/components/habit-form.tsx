@@ -41,26 +41,63 @@ export function HabitForm(props: HabitFormProps) {
 
   const utils = api.useUtils()
 
-  const handleSuccess = async () => {
+  const handleSuccess = async (
+    values?: z.infer<typeof formSchema>,
+    action?: string
+  ) => {
     await utils.habit.invalidate()
     setIsSubmitting(false)
+
+    switch (action) {
+      case 'create':
+        if (values) {
+          toast({
+            title: 'Habit created',
+            description: `You will ${values.what} ${values.when} so that you can ${values.why}.`,
+          })
+          posthog.capture('new-habit-created', { values })
+        }
+        break
+      case 'update':
+        if (values) {
+          toast({
+            title: 'Habit updated',
+            description: `Updated to: You will ${values.what} ${values.when} so that you can ${values.why}.`,
+          })
+          posthog.capture('habit-updated', { values })
+        }
+        break
+      case 'delete':
+        toast({
+          title: 'Habit deleted',
+          description: 'Your habit has been deleted.',
+        })
+        break
+      case 'revert':
+        toast({
+          title: 'Completion reverted',
+          description: 'Your habit completion has been reverted for today.',
+        })
+        break
+    }
+
     props.onSuccess?.()
   }
 
   const createHabit = api.habit.create.useMutation({
-    onSuccess: handleSuccess,
+    onSuccess: (_, variables) => handleSuccess(variables, 'create'),
   })
 
   const updateHabit = api.habit.update.useMutation({
-    onSuccess: handleSuccess,
+    onSuccess: (_, variables) => handleSuccess(variables, 'update'),
   })
 
   const deleteHabit = api.habit.delete.useMutation({
-    onSuccess: handleSuccess,
+    onSuccess: () => handleSuccess(undefined, 'delete'),
   })
 
   const revertCompletion = api.habit.revertCompletion.useMutation({
-    onSuccess: handleSuccess,
+    onSuccess: () => handleSuccess(undefined, 'revert'),
   })
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -80,18 +117,8 @@ export function HabitForm(props: HabitFormProps) {
         id: props.habit.id,
         ...values,
       })
-      posthog.capture('habit-updated', { values })
-      toast({
-        title: 'Habit updated',
-        description: `Updated to: You will ${values.what} ${values.when} so that you can ${values.why}.`,
-      })
     } else {
       createHabit.mutate(values)
-      posthog.capture('new-habit-created', { values })
-      toast({
-        title: 'Habit created',
-        description: `You will ${values.what} ${values.when} so that you can ${values.why}.`,
-      })
     }
   }
 
@@ -195,11 +222,6 @@ export function HabitForm(props: HabitFormProps) {
                   onClick={() => {
                     if (props.habit) {
                       revertCompletion.mutate({ habitId: props.habit.id })
-                      toast({
-                        title: 'Completion reverted',
-                        description:
-                          'Your habit completion has been reverted for today.',
-                      })
                       posthog.capture('habit-completion-reverted', {
                         habitId: props.habit.id,
                       })
@@ -218,10 +240,6 @@ export function HabitForm(props: HabitFormProps) {
                   onClick={() => {
                     if (props.habit) {
                       deleteHabit.mutate({ id: props.habit.id })
-                      toast({
-                        title: 'Habit deleted',
-                        description: 'Your habit has been deleted.',
-                      })
                       posthog.capture('habit-deleted', {
                         habitId: props.habit.id,
                       })
