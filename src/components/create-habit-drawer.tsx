@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import {
   Drawer,
   DrawerContent,
@@ -10,9 +13,11 @@ import { Button } from './ui/button'
 import { Icons } from './icons'
 import { HabitForm } from './habit-form'
 
-export async function CreateHabitDrawer() {
+export function CreateHabitDrawer() {
+  const [open, setOpen] = useState(false)
+
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button size={'default'}>
           <Icons.SquarePlus />
@@ -23,7 +28,7 @@ export async function CreateHabitDrawer() {
           <DrawerTitle>Create a new Habit</DrawerTitle>
         </DrawerHeader>
         <DrawerFooter>
-          <HabitForm />
+          <HabitForm onSuccess={() => setOpen(false)} />
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
