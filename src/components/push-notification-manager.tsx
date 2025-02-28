@@ -4,6 +4,7 @@ import { sendNotification, subscribeUser, unsubscribeUser } from '@/app/actions'
 import { urlBase64ToUint8Array } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 import { Button } from './ui/button'
+import { api } from '@/trpc/react'
 
 export function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false)
@@ -12,12 +13,25 @@ export function PushNotificationManager() {
   )
   const [message, setMessage] = useState('')
 
+  // Add a mutation for checking reminders
+  const checkReminders = api.habit.checkReminders.useMutation()
+
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true)
       registerServiceWorker().catch((e) => console.error(e))
     }
-  }, [])
+
+    // Set up a periodic check for habit reminders
+    // This would be better handled by a server-side scheduled job in production
+    const reminderInterval = setInterval(() => {
+      if (subscription) {
+        checkReminders.mutate()
+      }
+    }, 60000) // Check every minute
+
+    return () => clearInterval(reminderInterval)
+  }, [subscription])
 
   async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register('/sw.js', {
@@ -75,6 +89,9 @@ export function PushNotificationManager() {
               onChange={(e) => setMessage(e.target.value)}
             />
             <Button onClick={sendTestNotification}>Send Test</Button>
+            <Button onClick={() => checkReminders.mutate()}>
+              Check Reminders Now
+            </Button>
           </>
         ) : (
           <>

@@ -27,6 +27,8 @@ const formSchema = z.object({
   what: z.string().min(1, 'This field is required'),
   when: z.string().min(1, 'This field is required'),
   why: z.string().min(1, 'This field is required'),
+  reminderTime: z.string().optional(),
+  reminderEnabled: z.boolean().default(false),
 })
 
 interface HabitFormProps {
@@ -106,19 +108,32 @@ export function HabitForm(props: HabitFormProps) {
       what: props.habit?.what ?? '',
       when: props.habit?.when ?? '',
       why: props.habit?.why ?? '',
+      reminderTime: props.habit?.reminderTime ?? '',
+      reminderEnabled: props.habit?.reminderEnabled ?? false,
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
-
+    
+    // Explicitly create properly typed objects for mutation
     if (props.habit) {
       updateHabit.mutate({
         id: props.habit.id,
-        ...values,
+        what: values.what,
+        when: values.when,
+        why: values.why,
+        reminderTime: values.reminderTime,
+        reminderEnabled: Boolean(values.reminderEnabled),
       })
     } else {
-      createHabit.mutate(values)
+      createHabit.mutate({
+        what: values.what,
+        when: values.when,
+        why: values.why,
+        reminderTime: values.reminderTime,
+        reminderEnabled: Boolean(values.reminderEnabled),
+      })
     }
   }
 
@@ -201,6 +216,63 @@ export function HabitForm(props: HabitFormProps) {
                   </FormItem>
                 )}
               />
+            </div>
+            <Separator className="my-2" />
+            <div className="flex flex-col space-y-2 pb-2">
+              <h3 className="text-sm font-medium">Reminder Settings</h3>
+              <div className="flex items-center justify-between">
+                <FormField
+                  control={form.control}
+                  name="reminderEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-2">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          id="reminderEnabled"
+                        />
+                      </FormControl>
+                      <label
+                        htmlFor="reminderEnabled"
+                        className="text-sm font-medium"
+                      >
+                        Enable daily reminder
+                      </label>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {form.watch('reminderEnabled') && (
+                <FormField
+                  control={form.control}
+                  name="reminderTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center space-x-2">
+                        <label
+                          htmlFor="reminderTime"
+                          className="text-sm font-medium"
+                        >
+                          Remind me at:
+                        </label>
+                        <FormControl>
+                          <input
+                            type="time"
+                            id="reminderTime"
+                            className="rounded-md border border-gray-300 px-2 py-1"
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
             <Separator />
             <CardFooter className="flex flex-col gap-4 px-0">

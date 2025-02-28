@@ -7,11 +7,18 @@ import { and, eq, type InferSelectModel } from 'drizzle-orm'
 export const habitRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
-      z.object({
-        what: z.string().min(1),
-        why: z.string().min(1),
-        when: z.string().min(1),
-      })
+      z
+        .object({
+          what: z.string().min(1),
+          why: z.string().min(1),
+          when: z.string().min(1),
+          reminderTime: z.string().optional(),
+          reminderEnabled: z.boolean().optional(),
+        })
+        .transform((data) => ({
+          ...data,
+          reminderEnabled: Boolean(data.reminderEnabled),
+        }))
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(habits).values({
@@ -19,17 +26,26 @@ export const habitRouter = createTRPCRouter({
         what: input.what,
         why: input.why,
         when: input.when,
+        reminderTime: input.reminderTime,
+        reminderEnabled: input.reminderEnabled || false,
       })
     }),
 
   update: protectedProcedure
     .input(
-      z.object({
-        id: z.number(),
-        what: z.string().min(1),
-        why: z.string().min(1),
-        when: z.string().min(1),
-      })
+      z
+        .object({
+          id: z.number(),
+          what: z.string().min(1),
+          why: z.string().min(1),
+          when: z.string().min(1),
+          reminderTime: z.string().optional(),
+          reminderEnabled: z.boolean().optional(),
+        })
+        .transform((data) => ({
+          ...data,
+          reminderEnabled: Boolean(data.reminderEnabled),
+        }))
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -38,6 +54,8 @@ export const habitRouter = createTRPCRouter({
           what: input.what,
           why: input.why,
           when: input.when,
+          reminderTime: input.reminderTime,
+          reminderEnabled: input.reminderEnabled,
         })
         .where(eq(habits.id, input.id))
     }),
@@ -146,6 +164,16 @@ export const habitRouter = createTRPCRouter({
           completions.filter((completion) => completion.habitId === id).length
       )
     }),
+
+  checkReminders: protectedProcedure.mutation(async () => {
+    const { checkAndSendHabitReminders } = await import('@/app/actions')
+    const res = await checkAndSendHabitReminders()
+    if (res.success) {
+      console.log('The results are in!')
+      console.log(res.results)
+    }
+    return
+  }),
 })
 
 export type Habit = InferSelectModel<typeof habits>
