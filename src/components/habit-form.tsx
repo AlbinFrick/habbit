@@ -43,10 +43,7 @@ export function HabitForm(props: HabitFormProps) {
 
   const utils = api.useUtils()
 
-  const handleSuccess = async (
-    _?: z.infer<typeof formSchema>,
-    action?: string
-  ) => {
+  const handleSuccess = async (action?: string) => {
     await utils.habit.invalidate()
     setIsSubmitting(false)
 
@@ -86,19 +83,19 @@ export function HabitForm(props: HabitFormProps) {
 
   // Cast the input to enforce type compatibility
   const createHabit = api.habit.create.useMutation({
-    onSuccess: () => handleSuccess(undefined, 'create'),
+    onSuccess: () => handleSuccess('create'),
   })
 
   const updateHabit = api.habit.update.useMutation({
-    onSuccess: () => handleSuccess(undefined, 'update'),
+    onSuccess: () => handleSuccess('update'),
   })
 
   const deleteHabit = api.habit.delete.useMutation({
-    onSuccess: () => handleSuccess(undefined, 'delete'),
+    onSuccess: () => handleSuccess('delete'),
   })
 
   const revertCompletion = api.habit.revertCompletion.useMutation({
-    onSuccess: () => handleSuccess(undefined, 'revert'),
+    onSuccess: () => handleSuccess('revert'),
   })
 
   const form = useForm<z.infer<typeof formSchema>>({
