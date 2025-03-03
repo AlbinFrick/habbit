@@ -15,6 +15,13 @@
       "when": 1740645735282,
       "tag": "0001_tense_sir_ram",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1741011928523,
+      "tag": "0002_loving_tinkerer",
+      "breakpoints": true
     }
   ]
 }

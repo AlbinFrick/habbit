@@ -7,18 +7,13 @@ import { and, eq, type InferSelectModel } from 'drizzle-orm'
 export const habitRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
-      z
-        .object({
-          what: z.string().min(1),
-          why: z.string().min(1),
-          when: z.string().min(1),
-          reminderTime: z.string().optional(),
-          reminderEnabled: z.boolean().optional(),
-        })
-        .transform((data) => ({
-          ...data,
-          reminderEnabled: Boolean(data.reminderEnabled),
-        }))
+      z.object({
+        what: z.string().min(1),
+        why: z.string().min(1),
+        when: z.string().min(1),
+        reminderEnabled: z.boolean().default(false),
+        reminderTime: z.string().optional(),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(habits).values({
@@ -26,26 +21,21 @@ export const habitRouter = createTRPCRouter({
         what: input.what,
         why: input.why,
         when: input.when,
+        reminderEnabled: input.reminderEnabled,
         reminderTime: input.reminderTime,
-        reminderEnabled: input.reminderEnabled || false,
       })
     }),
 
   update: protectedProcedure
     .input(
-      z
-        .object({
-          id: z.number(),
-          what: z.string().min(1),
-          why: z.string().min(1),
-          when: z.string().min(1),
-          reminderTime: z.string().optional(),
-          reminderEnabled: z.boolean().optional(),
-        })
-        .transform((data) => ({
-          ...data,
-          reminderEnabled: Boolean(data.reminderEnabled),
-        }))
+      z.object({
+        id: z.number(),
+        what: z.string().min(1),
+        why: z.string().min(1),
+        when: z.string().min(1),
+        reminderEnabled: z.boolean().default(false),
+        reminderTime: z.string().optional(),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -54,8 +44,8 @@ export const habitRouter = createTRPCRouter({
           what: input.what,
           why: input.why,
           when: input.when,
-          reminderTime: input.reminderTime,
           reminderEnabled: input.reminderEnabled,
+          reminderTime: input.reminderTime,
         })
         .where(eq(habits.id, input.id))
     }),
@@ -167,12 +157,22 @@ export const habitRouter = createTRPCRouter({
 
   checkReminders: protectedProcedure.mutation(async () => {
     const { checkAndSendHabitReminders } = await import('@/app/actions')
-    const res = await checkAndSendHabitReminders()
-    if (res.success) {
-      console.log('The results are in!')
-      console.log(res.results)
+    const res = await checkAndSendHabitReminders(true) // Force check all reminders
+    
+    // Count how many reminders were actually sent
+    const sentCount = res.success
+      ? res.results.filter((result) => result.sent).length
+      : 0
+    
+    // Count completed habits (these won't get reminders)
+    const completedCount = res.results.filter((result) => 'completed' in result && result.completed).length
+    
+    return {
+      success: res.success,
+      sentCount,
+      completedCount,
+      totalHabits: res.results?.length || 0,
     }
-    return
   }),
 })
 

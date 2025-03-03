@@ -44,30 +44,28 @@ export function HabitForm(props: HabitFormProps) {
   const utils = api.useUtils()
 
   const handleSuccess = async (
-    values?: z.infer<typeof formSchema>,
+    _?: z.infer<typeof formSchema>,
     action?: string
   ) => {
     await utils.habit.invalidate()
     setIsSubmitting(false)
 
+    const formValues = form.getValues()
+
     switch (action) {
       case 'create':
-        if (values) {
-          toast({
-            title: 'Habit created',
-            description: `You will ${values.what} ${values.when} so that you can ${values.why}.`,
-          })
-          posthog.capture('new-habit-created', { values })
-        }
+        toast({
+          title: 'Habit created',
+          description: `You will ${formValues.what} ${formValues.when} so that you can ${formValues.why}.`,
+        })
+        posthog.capture('new-habit-created', { values: formValues })
         break
       case 'update':
-        if (values) {
-          toast({
-            title: 'Habit updated',
-            description: `Updated to: You will ${values.what} ${values.when} so that you can ${values.why}.`,
-          })
-          posthog.capture('habit-updated', { values })
-        }
+        toast({
+          title: 'Habit updated',
+          description: `Updated to: You will ${formValues.what} ${formValues.when} so that you can ${formValues.why}.`,
+        })
+        posthog.capture('habit-updated', { values: formValues })
         break
       case 'delete':
         toast({
@@ -86,12 +84,13 @@ export function HabitForm(props: HabitFormProps) {
     props.onSuccess?.()
   }
 
+  // Cast the input to enforce type compatibility
   const createHabit = api.habit.create.useMutation({
-    onSuccess: (_, variables) => handleSuccess(variables, 'create'),
+    onSuccess: () => handleSuccess(undefined, 'create'),
   })
 
   const updateHabit = api.habit.update.useMutation({
-    onSuccess: (_, variables) => handleSuccess(variables, 'update'),
+    onSuccess: () => handleSuccess(undefined, 'update'),
   })
 
   const deleteHabit = api.habit.delete.useMutation({
@@ -115,8 +114,8 @@ export function HabitForm(props: HabitFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
-    
-    // Explicitly create properly typed objects for mutation
+
+    // For update mutation
     if (props.habit) {
       updateHabit.mutate({
         id: props.habit.id,
@@ -127,6 +126,7 @@ export function HabitForm(props: HabitFormProps) {
         reminderEnabled: Boolean(values.reminderEnabled),
       })
     } else {
+      // For create mutation
       createHabit.mutate({
         what: values.what,
         when: values.when,
