@@ -9,23 +9,25 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 )
 
-export async function subscribeUser(sub: PushSubscription & { keys: { p256dh: string; auth: string } }) {
+export async function subscribeUser(
+  sub: PushSubscription & { keys: { p256dh: string; auth: string } }
+) {
   const { db } = await import('@/server/db')
   const { pushSubscriptions } = await import('@/server/db/schema')
   const { eq } = await import('drizzle-orm')
   const { auth } = await import('@/server/auth')
-  
+
   const session = await auth()
   if (!session?.user?.id) {
     return { success: false, error: 'User not authenticated' }
   }
-  
+
   try {
     // First check if a subscription with this endpoint already exists
     const existingSub = await db.query.pushSubscriptions.findFirst({
       where: eq(pushSubscriptions.endpoint, sub.endpoint),
     })
-    
+
     if (existingSub) {
       // Update the existing subscription
       await db
@@ -45,7 +47,7 @@ export async function subscribeUser(sub: PushSubscription & { keys: { p256dh: st
         auth: sub.keys.auth,
       })
     }
-    
+
     return { success: true }
   } catch (error) {
     console.error('Error storing push subscription:', error)
@@ -58,12 +60,12 @@ export async function unsubscribeUser(endpoint?: string) {
   const { pushSubscriptions } = await import('@/server/db/schema')
   const { eq } = await import('drizzle-orm')
   const { auth } = await import('@/server/auth')
-  
+
   const session = await auth()
   if (!session?.user?.id) {
     return { success: false, error: 'User not authenticated' }
   }
-  
+
   try {
     if (endpoint) {
       // Delete specific subscription by endpoint
@@ -76,7 +78,7 @@ export async function unsubscribeUser(endpoint?: string) {
         .delete(pushSubscriptions)
         .where(eq(pushSubscriptions.userId, session.user.id))
     }
-    
+
     return { success: true }
   } catch (error) {
     console.error('Error removing push subscription:', error)
@@ -93,27 +95,27 @@ export async function sendNotification(
   const { pushSubscriptions } = await import('@/server/db/schema')
   const { eq } = await import('drizzle-orm')
   const { auth } = await import('@/server/auth')
-  
+
   // Get current user if userId not provided
   if (!userId) {
     const session = await auth()
     userId = session?.user?.id
   }
-  
+
   if (!userId) {
     return { success: false, error: 'No user ID available' }
   }
-  
+
   try {
     // Get all subscriptions for this user
     const subs = await db.query.pushSubscriptions.findMany({
       where: eq(pushSubscriptions.userId, userId),
     })
-    
+
     if (!subs.length) {
       return { success: false, error: 'No subscriptions found' }
     }
-    
+
     const results = await Promise.allSettled(
       subs.map(async (sub) => {
         try {
@@ -124,7 +126,7 @@ export async function sendNotification(
               auth: sub.auth,
             },
           }
-          
+
           await webpush.sendNotification(
             pushSubscription as PushSubscription,
             JSON.stringify({
@@ -135,24 +137,30 @@ export async function sendNotification(
           )
           return { success: true, endpoint: sub.endpoint }
         } catch (error) {
-          console.error('Error sending notification to subscription:', sub.endpoint, error)
+          console.error(
+            'Error sending notification to subscription:',
+            sub.endpoint,
+            error
+          )
           if (error instanceof Error && error.name === 'WebPushError') {
             await db
               .delete(pushSubscriptions)
               .where(eq(pushSubscriptions.endpoint, sub.endpoint))
           }
           return { success: false, endpoint: sub.endpoint, error }
-          }
+        }
       })
     )
-    
-    const successCount = results.filter(r => r.status === 'fulfilled' && r.value.success).length
-    
-    return { 
+
+    const successCount = results.filter(
+      (r) => r.status === 'fulfilled' && r.value.success
+    ).length
+
+    return {
       success: successCount > 0,
       sent: successCount,
       total: subs.length,
-      results
+      results,
     }
   } catch (error) {
     console.error('Error sending push notifications:', error)
@@ -171,9 +179,9 @@ export async function sendHabitReminder(habitId: number, habitName: string) {
 
   // Get the habit to find the owner
   const habit = await db.query.habits.findFirst({
-    where: eq(habits.id, habitId)
+    where: eq(habits.id, habitId),
   })
-  
+
   if (!habit) {
     return { success: false, error: 'Habit not found' }
   }
@@ -201,7 +209,9 @@ export async function sendHabitReminder(habitId: number, habitName: string) {
 export async function checkAndSendHabitReminders(forceCheck = true) {
   // This would be triggered by a cron job or similar scheduler
   const { db } = await import('@/server/db')
-  const { habits, habitCompletions, pushSubscriptions } = await import('@/server/db/schema')
+  const { habits, habitCompletions, pushSubscriptions } = await import(
+    '@/server/db/schema'
+  )
   const { eq, and, not, isNull } = await import('drizzle-orm')
 
   // Get current time in HH:MM format
@@ -221,10 +231,10 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
     ),
   })
 
-  console.log(`Found ${habitsToRemind.length} habits with reminders enabled`)
-
   // Group habits by user for more efficient notification sending
-  const habitsByUser = habitsToRemind.reduce<Record<string, typeof habitsToRemind>>((acc, habit) => {
+  const habitsByUser = habitsToRemind.reduce<
+    Record<string, typeof habitsToRemind>
+  >((acc, habit) => {
     const userId = habit.createdById
     if (!acc[userId]) {
       acc[userId] = []
@@ -239,20 +249,22 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
   for (const [userId, userHabits] of Object.entries(habitsByUser)) {
     // Check if user has any push subscriptions
     const userSubs = await db.query.pushSubscriptions.findMany({
-      where: eq(pushSubscriptions.userId, userId)
+      where: eq(pushSubscriptions.userId, userId),
     })
-    
+
     if (!userSubs.length) {
       // Skip if user has no push subscriptions
-      results.push(...userHabits.map(habit => ({
-        habitId: habit.id,
-        habitName: habit.what,
-        sent: false,
-        reason: 'No push subscriptions found for user'
-      })))
+      results.push(
+        ...userHabits.map((habit) => ({
+          habitId: habit.id,
+          habitName: habit.what,
+          sent: false,
+          reason: 'No push subscriptions found for user',
+        }))
+      )
       continue
     }
-    
+
     // Process each habit for this user
     for (const habit of userHabits) {
       // Check if habit is already completed today
@@ -262,18 +274,18 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
           eq(habitCompletions.completedDate, today)
         ),
       })
-      
+
       if (completed) {
         // Skip already completed habits
         results.push({
           habitId: habit.id,
           habitName: habit.what,
           sent: false,
-          completed: true
+          completed: true,
         })
         continue
       }
-      
+
       // Send notification for this habit
       const result = await sendNotification(
         `Don't forget to ${habit.what} ${habit.when}!`,
