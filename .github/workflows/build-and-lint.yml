@@ -43,5 +43,7 @@ jobs:
           echo "NEXT_PUBLIC_VAPID_PUBLIC_KEY=${{ vars.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}" >> $GITHUB_ENV
           echo "SKIP_ENV_VALIDATION=true" >> $GITHUB_ENV
 
+      - name: test env variables
+        run: echo "The value of database is $TURSO_DATABASE_URL"
       - name: Build Next.js app
         run: pnpm build
