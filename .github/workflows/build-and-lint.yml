@@ -8,6 +8,7 @@ on:
 jobs:
   cache-and-install:
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout
