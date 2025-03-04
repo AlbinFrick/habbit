@@ -12,11 +12,6 @@ const globalForDb = globalThis as unknown as {
   client: Client | undefined
 }
 
-const url = env.TURSO_DATABASE_URL
-if (url === undefined) {
-  throw new Error('TURSO_URL is not defined', url)
-}
-
 const clientOptions =
   env.NODE_ENV === 'production'
     ? { url: env.TURSO_DATABASE_URL, authToken: env.TURSO_DATABASE_AUTH_TOKEN }
