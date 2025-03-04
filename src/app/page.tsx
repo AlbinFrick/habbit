@@ -8,7 +8,6 @@ import { NotLoggedInStartPage } from '@/components/not-logged-in-start-page'
 
 export default async function Home() {
   const session = await auth()
-  console.log(session)
 
   return (
     <HydrateClient>
