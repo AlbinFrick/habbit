@@ -1,4 +1,5 @@
 name: Build
+run-name: ${{ github.actor }} is testing building the project 🚀
 on:
   pull_request:
     branches:
