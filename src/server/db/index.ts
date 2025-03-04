@@ -12,6 +12,8 @@ const globalForDb = globalThis as unknown as {
   client: Client | undefined
 }
 
+console.log('turso database', env.TURSO_DATABASE_URL)
+
 const clientOptions =
   env.NODE_ENV === 'production'
     ? { url: env.TURSO_DATABASE_URL, authToken: env.TURSO_DATABASE_AUTH_TOKEN }
