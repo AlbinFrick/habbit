@@ -2,9 +2,9 @@ name: Habit Reminder Cron Job
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow every 5 minutes
+  # Triggers the workflow every minute
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/1 * * * *'
   # Allow manual triggering for testing
   workflow_dispatch:
 
@@ -17,19 +17,25 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
         with:
-          node-version: '18'
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Run habit reminder check
-        run: npx tsx src/scripts/check-reminders.ts
+        run: pnpx tsx src/scripts/check-reminders.ts
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
