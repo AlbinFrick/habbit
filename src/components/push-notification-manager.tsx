@@ -26,15 +26,17 @@ export function PushNotificationManager() {
       } else if (data?.completedCount === data?.totalHabits) {
         toast({
           title: 'All habits completed',
-          description: 'All habits with reminders are already completed today. Great job!',
+          description:
+            'All habits with reminders are already completed today. Great job!',
           variant: 'default',
         })
       } else {
         toast({
           title: 'No reminders sent',
-          description: data?.totalHabits > 0 
-            ? 'You have habits with reminders enabled, but you may need to set up push subscriptions.' 
-            : 'No habits with reminders found.',
+          description:
+            data?.totalHabits > 0
+              ? 'You have habits with reminders enabled, but you may need to set up push subscriptions.'
+              : 'No habits with reminders found.',
           variant: 'default',
         })
       }
@@ -57,10 +59,12 @@ export function PushNotificationManager() {
     // Set up a periodic check for habit reminders
     // This would be better handled by a server-side scheduled job in production
     const reminderInterval = setInterval(() => {
+      console.log('Checking reminders...')
       if (subscription) {
+        console.log('Should send reminders...')
         checkReminders.mutate()
       }
-    }, 60000) // Check every minute
+    }, 30000) // Check every minute
 
     return () => clearInterval(reminderInterval)
   }, [checkReminders, subscription])
@@ -162,4 +166,3 @@ export function PushNotificationManager() {
     </>
   )
 }
-
