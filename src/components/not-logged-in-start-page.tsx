@@ -13,6 +13,8 @@ export function NotLoggedInStartPage() {
     createdAt: new Date(),
     updatedAt: new Date(),
     id: 0,
+    reminderTime: null,
+    reminderEnabled: false,
   }
 
   return (

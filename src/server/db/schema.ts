@@ -53,6 +53,7 @@ export const users = createTable('user', {
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  pushSubscriptions: many(pushSubscriptions)
 }))
 
 export const accounts = createTable(
@@ -123,6 +124,8 @@ export const habits = createTable('habit', {
   what: text('what', { length: 255 }).notNull(),
   why: text('why', { length: 255 }).notNull(),
   when: text('when', { length: 255 }).notNull(),
+  reminderTime: text('reminder_time', { length: 10 }),
+  reminderEnabled: int('reminder_enabled', { mode: 'boolean' }).default(false),
 
   createdById: text('created_by', { length: 255 })
     .notNull()
@@ -162,3 +165,38 @@ export const habitCompletionsRelations = relations(
     }),
   })
 )
+
+// Push subscription table to store push notification subscriptions
+export const pushSubscriptions = createTable(
+  'push_subscription',
+  {
+    id: int('id').primaryKey({ autoIncrement: true }),
+    userId: text('user_id', { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(), // Public key
+    auth: text('auth').notNull(), // Auth secret
+    createdAt: int('created_at', { mode: 'timestamp' })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+    updatedAt: int('updated_at', { mode: 'timestamp' })
+      .$onUpdate(() => new Date())
+      .default(sql`(unixepoch())`),
+  },
+  (table) => ({
+    userIdIdx: index('push_sub_user_id_idx').on(table.userId),
+    uniqueEndpoint: unique().on(table.endpoint),
+  })
+)
+
+export const pushSubscriptionsRelations = relations(
+  pushSubscriptions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [pushSubscriptions.userId],
+      references: [users.id],
+    }),
+  })
+)
+
