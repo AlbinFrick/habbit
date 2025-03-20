@@ -302,5 +302,5 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
     }
   }
 
-  return { success: true, results, today }
+  return { success: true, results, today, currentTime }
 }
