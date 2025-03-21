@@ -286,19 +286,20 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
         continue
       }
 
+      console.log(`Sending reminder for habit ${habit.id}: ${habit.what}`)
       // Send notification for this habit
-      const result = await sendNotification(
-        `Don't forget to ${habit.what} ${habit.when}!`,
-        'Habit Reminder',
-        userId
-      )
+      // const result = await sendNotification(
+      //   `Don't forget to ${habit.what} ${habit.when}!`,
+      //   'Habit Reminder',
+      //   userId
+      // )
 
-      results.push({
-        habitId: habit.id,
-        habitName: habit.what,
-        sent: result.success,
-        ...result,
-      })
+      // results.push({
+      //   habitId: habit.id,
+      //   habitName: habit.what,
+      //   sent: result.success,
+      //   ...result,
+      // })
     }
   }
 
