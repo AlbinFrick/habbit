@@ -89,22 +89,11 @@ export async function unsubscribeUser(endpoint?: string) {
 export async function sendNotification(
   message: string,
   title = 'Habit Reminder',
-  userId?: string
+  userId: string
 ) {
   const { db } = await import('@/server/db')
   const { pushSubscriptions } = await import('@/server/db/schema')
   const { eq } = await import('drizzle-orm')
-  const { auth } = await import('@/server/auth')
-
-  // Get current user if userId not provided
-  if (!userId) {
-    const session = await auth()
-    userId = session?.user?.id
-  }
-
-  if (!userId) {
-    return { success: false, error: 'No user ID available' }
-  }
 
   try {
     // Get all subscriptions for this user
@@ -288,18 +277,18 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
 
       console.log(`Sending reminder for habit ${habit.id}: ${habit.what}`)
       // Send notification for this habit
-      // const result = await sendNotification(
-      //   `Don't forget to ${habit.what} ${habit.when}!`,
-      //   'Habit Reminder',
-      //   userId
-      // )
+      const result = await sendNotification(
+        `Don't forget to ${habit.what} ${habit.when}!`,
+        'Habit Reminder',
+        userId
+      )
 
-      // results.push({
-      //   habitId: habit.id,
-      //   habitName: habit.what,
-      //   sent: result.success,
-      //   ...result,
-      // })
+      results.push({
+        habitId: habit.id,
+        habitName: habit.what,
+        sent: result.success,
+        ...result,
+      })
     }
   }
 
