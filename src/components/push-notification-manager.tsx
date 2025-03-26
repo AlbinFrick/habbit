@@ -1,6 +1,10 @@
 'use client'
 
-import { sendNotification, subscribeUser, unsubscribeUser } from '@/app/actions'
+import {
+  sendTestNotification,
+  subscribeUser,
+  unsubscribeUser,
+} from '@/app/actions'
 import { urlBase64ToUint8Array } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 import { Button } from './ui/button'
@@ -103,9 +107,9 @@ export function PushNotificationManager() {
     }
   }
 
-  async function sendTestNotification() {
+  async function sendNotification() {
     if (subscription) {
-      await sendNotification(message)
+      await sendTestNotification(message)
       setMessage('')
     }
   }
@@ -151,7 +155,7 @@ export function PushNotificationManager() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
               />
-              <Button onClick={sendTestNotification} variant="secondary">
+              <Button onClick={sendNotification} variant="secondary">
                 Send Test
               </Button>
             </div>
