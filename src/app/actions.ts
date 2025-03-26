@@ -1,5 +1,6 @@
 'use server'
 
+import { auth } from '@/server/auth'
 import webpush, { type PushSubscription } from 'web-push'
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -86,10 +87,17 @@ export async function unsubscribeUser(endpoint?: string) {
   }
 }
 
+export async function sendTestNotification(message: string) {
+  const session = await auth()
+  if (session?.user?.id) {
+    return sendNotification(message, session.user.id, 'Test Notification')
+  }
+}
+
 export async function sendNotification(
   message: string,
-  title = 'Habit Reminder',
-  userId: string
+  userId: string,
+  title?: string
 ) {
   const { db } = await import('@/server/db')
   const { pushSubscriptions } = await import('@/server/db/schema')
