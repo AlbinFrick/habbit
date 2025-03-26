@@ -1,10 +1,6 @@
 'use client'
 
-import {
-  sendTestNotification,
-  subscribeUser,
-  unsubscribeUser,
-} from '@/app/actions'
+import { subscribeUser, unsubscribeUser } from '@/app/actions'
 import { urlBase64ToUint8Array } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 import { Button } from './ui/button'
@@ -16,7 +12,6 @@ export function PushNotificationManager() {
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null
   )
-  const [message, setMessage] = useState('')
   const { toast } = useToast()
 
   // Add a mutation for checking reminders
@@ -107,13 +102,6 @@ export function PushNotificationManager() {
     }
   }
 
-  async function sendNotification() {
-    if (subscription) {
-      await sendTestNotification(message)
-      setMessage('')
-    }
-  }
-
   function handleCheckRemindersNow() {
     checkReminders.mutate()
     toast({
@@ -144,19 +132,6 @@ export function PushNotificationManager() {
                 {checkReminders.isPending
                   ? 'Checking...'
                   : 'Check Reminders Now'}
-              </Button>
-            </div>
-
-            <div className="flex space-x-2">
-              <input
-                className="rounded-md border px-3 py-2 text-sm"
-                type="text"
-                placeholder="Enter notification message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-              <Button onClick={sendNotification} variant="secondary">
-                Send Test
               </Button>
             </div>
           </div>
