@@ -1,6 +1,10 @@
 'use client'
 
-import { subscribeUser, unsubscribeUser } from '@/app/actions'
+import {
+  checkAndSendHabitReminders,
+  subscribeUser,
+  unsubscribeUser,
+} from '@/app/actions'
 import { urlBase64ToUint8Array } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 import { Button } from './ui/button'
@@ -132,6 +136,9 @@ export function PushNotificationManager() {
                 {checkReminders.isPending
                   ? 'Checking...'
                   : 'Check Reminders Now'}
+              </Button>
+              <Button onClick={() => checkAndSendHabitReminders(false)}>
+                Test notification script
               </Button>
             </div>
           </div>
