@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { TZDate } from '@date-fns/tz'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -111,7 +112,6 @@ export function HabitForm(props: HabitFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
-
     // For update mutation
     if (props.habit) {
       updateHabit.mutate({
