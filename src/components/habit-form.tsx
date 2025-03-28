@@ -116,7 +116,6 @@ export function HabitForm(props: HabitFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
-
     // For update mutation
     if (props.habit) {
       updateHabit.mutate({
