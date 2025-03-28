@@ -157,44 +157,6 @@ export async function sendNotification(
   }
 }
 
-export async function sendHabitReminder(habitId: number, habitName: string) {
-  // This would typically be called by a scheduled job
-  // Check if the habit is already completed for today
-  const { db } = await import('@/server/db')
-  const { habitCompletions, habits } = await import('@/server/db/schema')
-  const { eq, and } = await import('drizzle-orm')
-
-  const today = new Date().toISOString().split('T')[0] ?? ''
-
-  // Get the habit to find the owner
-  const habit = await db.query.habits.findFirst({
-    where: eq(habits.id, habitId),
-  })
-
-  if (!habit) {
-    return { success: false, error: 'Habit not found' }
-  }
-
-  // Check if habit is already completed
-  const completed = await db.query.habitCompletions.findFirst({
-    where: and(
-      eq(habitCompletions.habitId, habitId),
-      eq(habitCompletions.completedDate, today)
-    ),
-  })
-
-  // Only send notification if the habit is not completed
-  if (!completed) {
-    return sendNotification(
-      `Don't forget to ${habitName} today!`,
-      'Habit Reminder',
-      habit.createdById
-    )
-  }
-
-  return { success: true, message: 'No notification needed' }
-}
-
 export async function checkAndSendHabitReminders(forceCheck = true) {
   // This would be triggered by a cron job or similar scheduler
   const { db } = await import('@/server/db')
