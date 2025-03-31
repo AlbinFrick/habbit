@@ -112,6 +112,7 @@ export function HabitForm(props: HabitFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
     // For update mutation
     if (props.habit) {
       updateHabit.mutate({
@@ -119,7 +120,9 @@ export function HabitForm(props: HabitFormProps) {
         what: values.what,
         when: values.when,
         why: values.why,
-        reminderTime: values.reminderTime,
+        reminderTime: values.reminderTime
+          ? `${values.reminderTime} ${timezone}`
+          : '',
         reminderEnabled: Boolean(values.reminderEnabled),
       })
     } else {
@@ -128,7 +131,9 @@ export function HabitForm(props: HabitFormProps) {
         what: values.what,
         when: values.when,
         why: values.why,
-        reminderTime: values.reminderTime,
+        reminderTime: values.reminderTime
+          ? `${values.reminderTime} ${timezone}`
+          : '',
         reminderEnabled: Boolean(values.reminderEnabled),
       })
     }
