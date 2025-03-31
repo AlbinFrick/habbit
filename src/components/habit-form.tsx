@@ -116,6 +116,7 @@ export function HabitForm(props: HabitFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
     // For update mutation
     if (props.habit) {
       updateHabit.mutate({
