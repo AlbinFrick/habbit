@@ -181,6 +181,7 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
   // Get current time in UTC
   const now = new Date()
   const today = now.toISOString().split('T')[0] ?? ''
+  let clientUTCHour;
 
   const serverUTCHour = now.getHours()
   const serverUTCMinute = now.getMinutes()
@@ -190,6 +191,7 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
     : habitsToRemind.filter(habit => {
         if (!habit.reminderTime) return false;
         const reminderTime = new UTCDate(habit.reminderTime)
+        clientUTCHour = reminderTime.getHours()
         return (
           reminderTime.getHours() === serverUTCHour &&
           reminderTime.getMinutes() === serverUTCMinute
@@ -272,6 +274,9 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
     success: true, 
     results, 
     today, 
-    currentTime: now?.toISOString()?.split('T')[1]?.split('.')[0]
+    currentTime: now?.toISOString()?.split('T')[1]?.split('.')[0],
+    clientUTCHour,
+    serverUTCHour,
+    serverUTCMinute,
   }
 }
