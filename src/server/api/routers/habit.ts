@@ -16,13 +16,26 @@ export const habitRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Convert reminder time to UTC timestamp if provided
+      let reminderTimeDate: Date | null = null
+      
+      if (input.reminderTime && input.reminderEnabled) {
+        // Parse the time string (HH:mm) and create a UTC timestamp
+        const [hours, minutes] = input.reminderTime.split(':').map(Number)
+        if (hours && minutes) {
+          const date = new Date()
+          date.setUTCHours(hours, minutes, 0, 0)
+          reminderTimeDate = date
+        }
+      }
+
       await ctx.db.insert(habits).values({
         createdById: ctx.session.user.id,
         what: input.what,
         why: input.why,
         when: input.when,
         reminderEnabled: input.reminderEnabled,
-        reminderTime: input.reminderTime,
+        reminderTime: reminderTimeDate,
       })
     }),
 
@@ -38,6 +51,19 @@ export const habitRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Convert reminder time to UTC timestamp if provided
+      let reminderTimeDate: Date | null = null
+      
+      if (input.reminderTime && input.reminderEnabled) {
+        // Parse the time string (HH:mm) and create a UTC timestamp
+        const [hours, minutes] = input.reminderTime.split(':').map(Number)
+        if (hours && minutes) {
+          const date = new Date()
+          date.setUTCHours(hours, minutes, 0, 0)
+          reminderTimeDate = date
+        }
+      }
+
       await ctx.db
         .update(habits)
         .set({
@@ -45,7 +71,7 @@ export const habitRouter = createTRPCRouter({
           why: input.why,
           when: input.when,
           reminderEnabled: input.reminderEnabled,
-          reminderTime: input.reminderTime,
+          reminderTime: reminderTimeDate,
         })
         .where(eq(habits.id, input.id))
     }),

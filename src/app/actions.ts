@@ -163,11 +163,14 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
   const { habits, habitCompletions, pushSubscriptions } = await import(
     '@/server/db/schema'
   )
-  const { eq, and, not, isNull } = await import('drizzle-orm')
+  const { eq, and, not, isNull, sql } = await import('drizzle-orm')
 
-  // Get current time in HH:MM format
+  // Get current time in UTC
   const now = new Date()
-  const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+  const currentHour = now.getUTCHours()
+  const currentMinute = now.getUTCMinutes()
+  
+  // Create a date object for today at the current time
   const today = now.toISOString().split('T')[0] ?? ''
 
   // Find all habits with enabled reminders
@@ -178,7 +181,13 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
       eq(habits.reminderEnabled, true),
       not(isNull(habits.reminderTime)),
       // If implementing time-specific checks, uncomment this:
-      forceCheck ? undefined : eq(habits.reminderTime, currentTime)
+      forceCheck ? undefined : and(
+        // Check if the hour and minute match the current time
+        // This is a simplified approach - in a real implementation you might want
+        // to use a more sophisticated time comparison
+        sql`strftime('%H', datetime(${habits.reminderTime}, 'unixepoch')) = ${currentHour.toString().padStart(2, '0')}`,
+        sql`strftime('%M', datetime(${habits.reminderTime}, 'unixepoch')) = ${currentMinute.toString().padStart(2, '0')}`
+      )
     ),
   })
 
@@ -254,5 +263,10 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
     }
   }
 
-  return { success: true, results, today, currentTime }
+  return { 
+    success: true, 
+    results, 
+    today, 
+    currentTime: `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}` 
+  }
 }
