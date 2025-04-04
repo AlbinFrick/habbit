@@ -109,7 +109,7 @@ export function HabitForm(props: HabitFormProps) {
       reminderTime: props.habit?.reminderTime
         ? formatInTimeZone(
             new Date(props.habit.reminderTime),
-            Intl.DateTimeFormat().resolvedOptions().timeZone,
+            'Europe/Helsinki',
             'HH:mm'
           )
         : '',
