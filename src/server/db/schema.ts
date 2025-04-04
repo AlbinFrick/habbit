@@ -124,7 +124,7 @@ export const habits = createTable('habit', {
   what: text('what', { length: 255 }).notNull(),
   why: text('why', { length: 255 }).notNull(),
   when: text('when', { length: 255 }).notNull(),
-  reminderTime: text('reminder_time', { length: 10 }),
+  reminderTime: int('reminder_time', { mode: 'timestamp' }),
   reminderEnabled: int('reminder_enabled', { mode: 'boolean' }).default(false),
 
   createdById: text('created_by', { length: 255 })

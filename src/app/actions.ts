@@ -157,55 +157,20 @@ export async function sendNotification(
   }
 }
 
-export async function sendHabitReminder(habitId: number, habitName: string) {
-  // This would typically be called by a scheduled job
-  // Check if the habit is already completed for today
-  const { db } = await import('@/server/db')
-  const { habitCompletions, habits } = await import('@/server/db/schema')
-  const { eq, and } = await import('drizzle-orm')
-
-  const today = new Date().toISOString().split('T')[0] ?? ''
-
-  // Get the habit to find the owner
-  const habit = await db.query.habits.findFirst({
-    where: eq(habits.id, habitId),
-  })
-
-  if (!habit) {
-    return { success: false, error: 'Habit not found' }
-  }
-
-  // Check if habit is already completed
-  const completed = await db.query.habitCompletions.findFirst({
-    where: and(
-      eq(habitCompletions.habitId, habitId),
-      eq(habitCompletions.completedDate, today)
-    ),
-  })
-
-  // Only send notification if the habit is not completed
-  if (!completed) {
-    return sendNotification(
-      `Don't forget to ${habitName} today!`,
-      'Habit Reminder',
-      habit.createdById
-    )
-  }
-
-  return { success: true, message: 'No notification needed' }
-}
-
 export async function checkAndSendHabitReminders(forceCheck = true) {
   // This would be triggered by a cron job or similar scheduler
   const { db } = await import('@/server/db')
   const { habits, habitCompletions, pushSubscriptions } = await import(
     '@/server/db/schema'
   )
-  const { eq, and, not, isNull } = await import('drizzle-orm')
+  const { eq, and, not, isNull, sql } = await import('drizzle-orm')
 
-  // Get current time in HH:MM format
+  // Get current time in UTC
   const now = new Date()
-  const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+  const currentHour = now.getUTCHours()
+  const currentMinute = now.getUTCMinutes()
+  
+  // Create a date object for today at the current time
   const today = now.toISOString().split('T')[0] ?? ''
 
   // Find all habits with enabled reminders
@@ -216,7 +181,13 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
       eq(habits.reminderEnabled, true),
       not(isNull(habits.reminderTime)),
       // If implementing time-specific checks, uncomment this:
-      forceCheck ? undefined : eq(habits.reminderTime, currentTime)
+      forceCheck ? undefined : and(
+        // Check if the hour and minute match the current time
+        // This is a simplified approach - in a real implementation you might want
+        // to use a more sophisticated time comparison
+        sql`strftime('%H', datetime(${habits.reminderTime}, 'unixepoch')) = ${currentHour.toString().padStart(2, '0')}`,
+        sql`strftime('%M', datetime(${habits.reminderTime}, 'unixepoch')) = ${currentMinute.toString().padStart(2, '0')}`
+      )
     ),
   })
 
@@ -292,5 +263,10 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
     }
   }
 
-  return { success: true, results, today, currentTime }
+  return { 
+    success: true, 
+    results, 
+    today, 
+    currentTime: `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}` 
+  }
 }

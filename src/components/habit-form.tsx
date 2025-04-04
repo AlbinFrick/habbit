@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { format } from 'date-fns'
+import { toZonedTime } from 'date-fns-tz'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -40,6 +42,7 @@ interface HabitFormProps {
 export function HabitForm(props: HabitFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   const utils = api.useUtils()
 
@@ -104,7 +107,9 @@ export function HabitForm(props: HabitFormProps) {
       what: props.habit?.what ?? '',
       when: props.habit?.when ?? '',
       why: props.habit?.why ?? '',
-      reminderTime: props.habit?.reminderTime ?? '',
+      reminderTime: props.habit?.reminderTime
+        ? format(toZonedTime(props.habit.reminderTime, timezone), 'HH:mm')
+        : '',
       reminderEnabled: props.habit?.reminderEnabled ?? false,
     },
   })
@@ -119,7 +124,7 @@ export function HabitForm(props: HabitFormProps) {
         what: values.what,
         when: values.when,
         why: values.why,
-        reminderTime: values.reminderTime,
+        reminderTime: values.reminderEnabled ? values.reminderTime : '',
         reminderEnabled: Boolean(values.reminderEnabled),
       })
     } else {
@@ -128,7 +133,7 @@ export function HabitForm(props: HabitFormProps) {
         what: values.what,
         when: values.when,
         why: values.why,
-        reminderTime: values.reminderTime,
+        reminderTime: values.reminderEnabled ? values.reminderTime : '',
         reminderEnabled: Boolean(values.reminderEnabled),
       })
     }
