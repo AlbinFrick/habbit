@@ -67,6 +67,7 @@ export const habitRouter = createTRPCRouter({
           date.setMinutes(minutes)
           const UTCdate = new UTCDate(date)
           reminderTimeDate = UTCdate
+          console.log('reminderTimeDate', reminderTimeDate)
         }
       }
 
