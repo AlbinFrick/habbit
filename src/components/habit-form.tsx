@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { format } from 'date-fns'
 import { toZonedTime } from 'date-fns-tz'
+import { TZDate } from '@date-fns/tz'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -24,6 +25,7 @@ import { api } from '@/trpc/react'
 import posthog from 'posthog-js'
 import { type Habit } from '@/server/api/routers/habit'
 import { cn } from '@/lib/utils'
+import { UTCDate } from '@date-fns/utc'
 
 const formSchema = z.object({
   what: z.string().min(1, 'This field is required'),
@@ -108,7 +110,7 @@ export function HabitForm(props: HabitFormProps) {
       when: props.habit?.when ?? '',
       why: props.habit?.why ?? '',
       reminderTime: props.habit?.reminderTime
-        ? format(toZonedTime(props.habit.reminderTime, timezone), 'HH:mm')
+        ? format(new UTCDate(props.habit?.reminderTime), 'HH:mm')
         : '',
       reminderEnabled: props.habit?.reminderEnabled ?? false,
     },
@@ -117,7 +119,6 @@ export function HabitForm(props: HabitFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
 
-    // For update mutation
     if (props.habit) {
       updateHabit.mutate({
         id: props.habit.id,
