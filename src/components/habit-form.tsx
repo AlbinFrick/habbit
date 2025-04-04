@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { format } from 'date-fns'
+import { tz } from '@date-fns/tz'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -106,7 +107,7 @@ export function HabitForm(props: HabitFormProps) {
       when: props.habit?.when ?? '',
       why: props.habit?.why ?? '',
       reminderTime: props.habit?.reminderTime
-        ? format(props.habit.reminderTime, 'HH:mm')
+        ? format(props.habit.reminderTime, 'HH:mm', { in: tz('UTC') })
         : '',
       reminderEnabled: props.habit?.reminderEnabled ?? false,
     },
