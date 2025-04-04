@@ -1,6 +1,8 @@
 'use server'
 
 import webpush, { type PushSubscription } from 'web-push'
+import { UTCDate } from "@date-fns/utc";
+
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 webpush.setVapidDetails(
@@ -163,15 +165,8 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
   const { habits, habitCompletions, pushSubscriptions } = await import(
     '@/server/db/schema'
   )
-  const { eq, and, not, isNull, sql } = await import('drizzle-orm')
+  const { eq, and, not, isNull } = await import('drizzle-orm')
 
-  // Get current time in UTC
-  const now = new Date()
-  const currentHour = now.getUTCHours()
-  const currentMinute = now.getUTCMinutes()
-  
-  // Create a date object for today at the current time
-  const today = now.toISOString().split('T')[0] ?? ''
 
   // Find all habits with enabled reminders
   // When forceCheck is true (manual check), we check all habits regardless of time
@@ -179,21 +174,31 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
   const habitsToRemind = await db.query.habits.findMany({
     where: and(
       eq(habits.reminderEnabled, true),
-      not(isNull(habits.reminderTime)),
-      // If implementing time-specific checks, uncomment this:
-      forceCheck ? undefined : and(
-        // Check if the hour and minute match the current time
-        // This is a simplified approach - in a real implementation you might want
-        // to use a more sophisticated time comparison
-        sql`strftime('%H', datetime(${habits.reminderTime}, 'unixepoch')) = ${currentHour.toString().padStart(2, '0')}`,
-        sql`strftime('%M', datetime(${habits.reminderTime}, 'unixepoch')) = ${currentMinute.toString().padStart(2, '0')}`
-      )
+      not(isNull(habits.reminderTime))
     ),
   })
 
+  // Get current time in UTC
+  const UTCnow = new UTCDate()
+  const today = UTCnow.toISOString().split('T')[0] ?? ''
+
+  const serverUTCHour = UTCnow.getHours()
+  const serverUTCMinute = UTCnow.getMinutes()
+
+  const filteredHabits = forceCheck 
+    ? habitsToRemind 
+    : habitsToRemind.filter(habit => {
+        if (!habit.reminderTime) return false;
+        const reminderTime = new Date(habit.reminderTime)
+        return (
+          reminderTime.getHours() === serverUTCHour &&
+          reminderTime.getMinutes() === serverUTCMinute
+        )
+      })
+
   // Group habits by user for more efficient notification sending
-  const habitsByUser = habitsToRemind.reduce<
-    Record<string, typeof habitsToRemind>
+  const habitsByUser = filteredHabits.reduce<
+    Record<string, typeof filteredHabits>
   >((acc, habit) => {
     const userId = habit.createdById
     if (!acc[userId]) {
@@ -267,6 +272,6 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
     success: true, 
     results, 
     today, 
-    currentTime: `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}` 
+    currentTime: UTCnow?.toISOString()?.split('T')[1]?.split('.')[0]
   }
 }
