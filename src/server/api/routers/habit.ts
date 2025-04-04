@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
 import { habitCompletions, habits } from '@/server/db/schema'
 import { and, eq, type InferSelectModel } from 'drizzle-orm'
+import { UTCDate } from '@date-fns/utc'
 
 export const habitRouter = createTRPCRouter({
   create: protectedProcedure
@@ -58,8 +59,9 @@ export const habitRouter = createTRPCRouter({
         // Parse the time string (HH:mm) and create a UTC timestamp
         const [hours, minutes] = input.reminderTime.split(':').map(Number)
         if (hours && minutes) {
-          const date = new Date()
-          date.setUTCHours(hours, minutes, 0, 0)
+          const date = new UTCDate()
+          date.setHours(hours)
+          date.setMinutes(minutes)
           reminderTimeDate = date
         }
       }
