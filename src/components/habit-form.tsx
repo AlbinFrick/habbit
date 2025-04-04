@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { format } from 'date-fns'
-import { formatInTimeZone } from 'date-fns-tz'
+import { getHours, getMinutes } from 'date-fns'
+import { tz } from '@date-fns/tz'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -100,6 +100,7 @@ export function HabitForm(props: HabitFormProps) {
     onSuccess: () => handleSuccess('revert'),
   })
 
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -107,11 +108,13 @@ export function HabitForm(props: HabitFormProps) {
       when: props.habit?.when ?? '',
       why: props.habit?.why ?? '',
       reminderTime: props.habit?.reminderTime
-        ? formatInTimeZone(
-            new Date(props.habit.reminderTime),
-            'Europe/Helsinki',
-            'HH:mm'
-          )
+        ? `${getHours(props.habit.reminderTime, { in: tz(timezone) })
+            .toString()
+            .padStart(2, '0')}:${getMinutes(props.habit.reminderTime, {
+            in: tz(timezone),
+          })
+            .toString()
+            .padStart(2, '0')}`
         : '',
       reminderEnabled: props.habit?.reminderEnabled ?? false,
     },
