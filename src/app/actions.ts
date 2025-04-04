@@ -190,7 +190,7 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
     ? habitsToRemind 
     : habitsToRemind.filter(habit => {
         if (!habit.reminderTime) return false;
-        const reminderTime = new Date(habit.reminderTime)
+        const reminderTime = new UTCDate(habit.reminderTime)
         clientUTCHour = reminderTime.getHours()
         return (
           reminderTime.getHours() === serverUTCHour &&
