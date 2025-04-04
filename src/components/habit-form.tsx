@@ -100,6 +100,7 @@ export function HabitForm(props: HabitFormProps) {
     onSuccess: () => handleSuccess('revert'),
   })
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  console.log('timezone', timezone)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
