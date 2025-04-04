@@ -23,7 +23,7 @@ import { api } from '@/trpc/react'
 import posthog from 'posthog-js'
 import { type Habit } from '@/server/api/routers/habit'
 import { cn } from '@/lib/utils'
-import { UTCDate } from '@date-fns/utc'
+import { TZDate } from '@date-fns/tz'
 
 const formSchema = z.object({
   what: z.string().min(1, 'This field is required'),
@@ -99,6 +99,7 @@ export function HabitForm(props: HabitFormProps) {
   const revertCompletion = api.habit.revertCompletion.useMutation({
     onSuccess: () => handleSuccess('revert'),
   })
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -107,7 +108,7 @@ export function HabitForm(props: HabitFormProps) {
       when: props.habit?.when ?? '',
       why: props.habit?.why ?? '',
       reminderTime: props.habit?.reminderTime
-        ? format(new UTCDate(props.habit?.reminderTime), 'HH:mm')
+        ? format(new TZDate(props.habit?.reminderTime, timezone), 'HH:mm')
         : '',
       reminderEnabled: props.habit?.reminderEnabled ?? false,
     },
