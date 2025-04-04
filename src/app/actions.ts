@@ -179,6 +179,7 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
   })
 
   // Get current time in UTC
+  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
   const now = new UTCDate()
   const today = now.toISOString().split('T')[0] ?? ''
   let clientUTCHour;
@@ -278,5 +279,6 @@ export async function checkAndSendHabitReminders(forceCheck = true) {
     clientUTCHour,
     serverUTCHour,
     serverUTCMinute,
+    localTimezone,
   }
 }
