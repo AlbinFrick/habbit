@@ -24,11 +24,12 @@ export const habitRouter = createTRPCRouter({
         // Parse the time string (HH:mm) and create a UTC timestamp
         const [hours, minutes] = input.reminderTime.split(':').map(Number)
         if (hours && minutes) {
-          const date = new UTCDate()
+
+          const date = new Date()
           date.setHours(hours)
           date.setMinutes(minutes)
-          reminderTimeDate = date
-          console.log( 'reminderTimeDate', reminderTimeDate )
+          const UTCdate = new UTCDate(date)
+          reminderTimeDate = UTCdate
         }
       }
 
@@ -61,15 +62,11 @@ export const habitRouter = createTRPCRouter({
         // Parse the time string (HH:mm) and create a UTC timestamp
         const [hours, minutes] = input.reminderTime.split(':').map(Number)
         if (hours && minutes) {
-          const date = new UTCDate()
-        console.log( '--------------------------------' )
-        console.log( 'hours', hours )
-        console.log( 'minutes', minutes )
-        console.log( '--------------------------------' )
+          const date = new Date()
           date.setHours(hours)
           date.setMinutes(minutes)
-          reminderTimeDate = date
-          console.log( 'reminderTimeDate', reminderTimeDate )
+          const UTCdate = new UTCDate(date)
+          reminderTimeDate = UTCdate
         }
       }
 
