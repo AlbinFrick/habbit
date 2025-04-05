@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc'
 import { habitCompletions, habits } from '@/server/db/schema'
 import { and, eq, type InferSelectModel } from 'drizzle-orm'
-import { UTCDate } from '@date-fns/utc'
 
 export const habitRouter = createTRPCRouter({
   create: protectedProcedure
@@ -13,33 +12,17 @@ export const habitRouter = createTRPCRouter({
         why: z.string().min(1),
         when: z.string().min(1),
         reminderEnabled: z.boolean().default(false),
-        reminderTime: z.string().optional(),
+        reminderTime: z.date().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Convert reminder time to UTC timestamp if provided
-      let reminderTimeDate: Date | null = null
-      
-      if (input.reminderTime && input.reminderEnabled) {
-        // Parse the time string (HH:mm) and create a UTC timestamp
-        const [hours, minutes] = input.reminderTime.split(':').map(Number)
-        if (hours && minutes) {
-
-          const date = new Date()
-          date.setHours(hours)
-          date.setMinutes(minutes)
-          const UTCdate = new UTCDate(date)
-          reminderTimeDate = UTCdate
-        }
-      }
-
       await ctx.db.insert(habits).values({
         createdById: ctx.session.user.id,
         what: input.what,
         why: input.why,
         when: input.when,
         reminderEnabled: input.reminderEnabled,
-        reminderTime: reminderTimeDate,
+        reminderTime: input.reminderTime,
       })
     }),
 
@@ -51,25 +34,10 @@ export const habitRouter = createTRPCRouter({
         why: z.string().min(1),
         when: z.string().min(1),
         reminderEnabled: z.boolean().default(false),
-        reminderTime: z.string().optional(),
+        reminderTime: z.date().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Convert reminder time to UTC timestamp if provided
-      let reminderTimeDate: Date | null = null
-      
-      if (input.reminderTime && input.reminderEnabled) {
-        // Parse the time string (HH:mm) and create a UTC timestamp
-        const [hours, minutes] = input.reminderTime.split(':').map(Number)
-        if (hours && minutes) {
-          const date = new Date()
-          date.setHours(hours)
-          date.setMinutes(minutes)
-          const UTCdate = new UTCDate(date)
-          reminderTimeDate = UTCdate
-          console.log('reminderTimeDate', reminderTimeDate)
-        }
-      }
 
       await ctx.db
         .update(habits)
@@ -78,7 +46,7 @@ export const habitRouter = createTRPCRouter({
           why: input.why,
           when: input.when,
           reminderEnabled: input.reminderEnabled,
-          reminderTime: reminderTimeDate,
+          reminderTime: input.reminderTime,
         })
         .where(eq(habits.id, input.id))
     }),
