@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { format } from 'date-fns'
 import { tz } from '@date-fns/tz'
+import { UTCDate } from '@date-fns/utc'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -100,6 +101,8 @@ export function HabitForm(props: HabitFormProps) {
     onSuccess: () => handleSuccess('revert'),
   })
 
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -107,7 +110,7 @@ export function HabitForm(props: HabitFormProps) {
       when: props.habit?.when ?? '',
       why: props.habit?.why ?? '',
       reminderTime: props.habit?.reminderTime
-        ? format(props.habit.reminderTime, 'HH:mm', { in: tz('UTC') })
+        ? format(props.habit.reminderTime, 'HH:mm', { in: tz(timezone) })
         : '',
       reminderEnabled: props.habit?.reminderEnabled ?? false,
     },
@@ -115,6 +118,18 @@ export function HabitForm(props: HabitFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
+    let reminderTimeDate: Date | undefined = undefined
+    if (values.reminderTime) {
+      const [hours, minutes] = values.reminderTime.split(':').map(Number)
+      if (hours && minutes) {
+        const date = new Date()
+        date.setHours(hours)
+        date.setMinutes(minutes)
+        const UTCdate = new UTCDate(date)
+        reminderTimeDate = UTCdate
+        console.log('reminderTimeDate', reminderTimeDate)
+      }
+    }
 
     if (props.habit) {
       updateHabit.mutate({
@@ -122,7 +137,7 @@ export function HabitForm(props: HabitFormProps) {
         what: values.what,
         when: values.when,
         why: values.why,
-        reminderTime: values.reminderEnabled ? values.reminderTime : '',
+        reminderTime: values.reminderEnabled ? reminderTimeDate : undefined,
         reminderEnabled: Boolean(values.reminderEnabled),
       })
     } else {
@@ -131,7 +146,7 @@ export function HabitForm(props: HabitFormProps) {
         what: values.what,
         when: values.when,
         why: values.why,
-        reminderTime: values.reminderEnabled ? values.reminderTime : '',
+        reminderTime: values.reminderEnabled ? reminderTimeDate : undefined,
         reminderEnabled: Boolean(values.reminderEnabled),
       })
     }
