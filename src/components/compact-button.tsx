@@ -2,15 +2,17 @@
 import React from 'react'
 import { Button } from './ui/button'
 import { Icons } from './icons'
-import { useHabitActions } from '@/stores/habitStore'
+import { useCompactMode, useHabitActions } from '@/stores/habitStore'
 
 export const CompactButton = () => {
   const { toggleCompactMode } = useHabitActions()
+  const compactMode = useCompactMode()
   return (
     <Button
+      variant={compactMode ? 'default' : 'outline'}
+      effect={'shineHover'}
       size={'icon'}
       onClick={() => {
-        console.log('clicked')
         toggleCompactMode()
       }}
     >
