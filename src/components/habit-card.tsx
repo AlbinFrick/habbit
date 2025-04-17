@@ -112,7 +112,7 @@ export const HabitCard = (props: HabitCardProps) => {
       transition={{ duration: 0.3 }}
       className={cn(
         'relative w-full overflow-clip rounded-3xl bg-white shadow-lg',
-        compactView ? 'h-[180px]' : 'h-[75vh] md:h-[44rem]'
+        compactView ? 'h-[180px]' : 'h-[75vh] min-h-[33rem] md:h-[44rem]'
       )}
     >
       <div
@@ -190,24 +190,28 @@ export const HabitCard = (props: HabitCardProps) => {
             )}
           </div>
 
-          <motion.button
-            onContextMenu={(e) => e.preventDefault()}
-            disabled={props.isCompleted}
-            onTapStart={() => !props.isCompleted && handleHoldStart()}
-            onTap={handleHoldEnd}
-            onTapCancel={handleHoldEnd}
-            id="check-button"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.5 }}
-            className={cn(
-              'text-text bg-base rounded-full p-12 select-none',
-              compactView && 'p-8',
-              props.isCompleted && 'bg-transparent'
-            )}
-          >
-            <Icons.Check className={cn('size-24', compactView && 'size-12')} />
-          </motion.button>
+          {!isEditing && (
+            <motion.button
+              onContextMenu={(e) => e.preventDefault()}
+              disabled={props.isCompleted}
+              onTapStart={() => !props.isCompleted && handleHoldStart()}
+              onTap={handleHoldEnd}
+              onTapCancel={handleHoldEnd}
+              id="check-button"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.5 }}
+              className={cn(
+                'text-text bg-base rounded-full p-12 select-none',
+                compactView && 'p-8',
+                props.isCompleted && 'bg-transparent'
+              )}
+            >
+              <Icons.Check
+                className={cn('size-24', compactView && 'size-12')}
+              />
+            </motion.button>
+          )}
         </div>
       </div>
     </motion.div>
