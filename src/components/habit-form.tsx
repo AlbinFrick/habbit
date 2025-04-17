@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { format } from 'date-fns'
 import { tz } from '@date-fns/tz'
 import { UTCDate } from '@date-fns/utc'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { format } from 'date-fns'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -16,15 +17,18 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form'
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
 
-import { CustomInput } from './habit-input'
-import { api } from '@/trpc/react'
-import posthog from 'posthog-js'
-import { type Habit } from '@/server/api/routers/habit'
 import { cn } from '@/lib/utils'
+import type { Habit } from '@/server/api/routers/habit'
+import { api } from '@/trpc/react'
+import { motion } from 'motion/react'
+import posthog from 'posthog-js'
+import { CustomInput } from './habit-input'
+import { Checkbox } from './ui/checkbox'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 
 const formSchema = z.object({
   what: z.string().min(1, 'This field is required'),
@@ -233,60 +237,56 @@ export function HabitForm(props: HabitFormProps) {
               />
             </div>
             <Separator className="my-2" />
-            <div className="flex flex-col space-y-2 pb-2">
-              <h3 className="text-sm font-medium">Reminder Settings</h3>
+            <div className="flex flex-col space-y-2">
               <div className="flex items-center justify-between">
                 <FormField
                   control={form.control}
                   name="reminderEnabled"
                   render={({ field }) => (
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center justify-end gap-2 py-2">
                       <FormControl>
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600"
-                          checked={field.value}
-                          onChange={field.onChange}
+                        <Checkbox
+                          className="m-0 mb-0.5"
                           id="reminderEnabled"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <label
-                        htmlFor="reminderEnabled"
-                        className="text-sm font-medium"
-                      >
+                      <Label htmlFor="reminderEnabled">
                         Enable daily reminder
-                      </label>
+                      </Label>
                     </FormItem>
                   )}
                 />
               </div>
               {form.watch('reminderEnabled') && (
-                <FormField
-                  control={form.control}
-                  name="reminderTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center space-x-2">
-                        <label
-                          htmlFor="reminderTime"
-                          className="text-sm font-medium"
-                        >
-                          Remind me at:
-                        </label>
-                        <FormControl>
-                          <input
-                            type="time"
-                            id="reminderTime"
-                            className="rounded-md border border-gray-300 px-2 py-1"
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <FormField
+                    control={form.control}
+                    name="reminderTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex items-center justify-between space-x-2">
+                          <Label htmlFor="reminderTime">Remind me at:</Label>
+                          <FormControl>
+                            <Input
+                              type="time"
+                              id="reminderTime"
+                              className="w-min rounded-md border px-2 py-1 text-gray-800"
+                              value={field.value}
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </motion.div>
               )}
             </div>
             <Separator />
