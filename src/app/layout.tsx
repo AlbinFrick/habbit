@@ -36,10 +36,10 @@ export default function RootLayout({
       lang="en"
       className={cn('latte', poppins.variable, bricolage_grotesque.variable)}
     >
-      <body>
+      <body className="bg-base">
         <TRPCReactProvider>
           <PostHogProvider>
-            <div className="bg-base">{children}</div>
+            {children}
             <Toaster />
           </PostHogProvider>
         </TRPCReactProvider>
