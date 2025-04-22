@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
 		description: "A app for tracking all your habits",
 		start_url: "/",
 		display: "standalone",
-		background_color: "var(--color-base)",
-		theme_color: "var(--color-base)",
+		background_color: "#eff1f5",
+		theme_color: "#eff1f5",
 		icons: [
 			{
 				src: "/rabbit.svg",
