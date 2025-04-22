@@ -60,7 +60,7 @@ export const HabitCard = (props: HabitCardProps) => {
     animate(buttonSequence)
   }
 
-  const notCompletedAnimation = useCallback(() => {
+  const notCompletedAnimation = () => {
     if (props.isCompleted) return
     animate(
       '#backdrop',
@@ -77,11 +77,24 @@ export const HabitCard = (props: HabitCardProps) => {
       { duration: 0.8 }
     )
     animate('#count', { rotate: 0, scale: 1 }, { duration: 0.3 })
-  }, [animate, compactView, props.isCompleted])
+  }
+
+  const revertCompletion = useCallback(() => {
+    animate(
+      '#backdrop',
+      {
+        height: '0',
+        opacity: 0,
+        left: compactView ? '80%' : '50%',
+      },
+      { duration: 0.8 }
+    )
+    animate('#count', { rotate: 0, scale: 1 }, { duration: 0.3 })
+  }, [animate, compactView])
 
   useEffect(() => {
-    if (props.reset()) notCompletedAnimation()
-  }, [props.reset, notCompletedAnimation, props])
+    if (props.reset()) revertCompletion()
+  }, [props.reset, revertCompletion, props])
 
   const handleHoldStart = () => {
     completedAnimation()
@@ -118,7 +131,7 @@ export const HabitCard = (props: HabitCardProps) => {
       <div
         id="count"
         className={cn(
-          props.isCompleted ? 'from-sapphire to-green' : 'from-sky to-blue',
+          localComplete ? 'from-sapphire to-green' : 'from-sky to-blue',
           'bg-peach absolute top-2 right-2 z-50 flex items-center gap-1 rounded-xl bg-linear-to-r px-3 py-1.5'
         )}
       >
@@ -131,7 +144,7 @@ export const HabitCard = (props: HabitCardProps) => {
         className={cn(
           'absolute bottom-[25%] left-1/2 aspect-square h-0 -translate-x-1/2 translate-y-1/2 rounded-full',
           compactView && 'bottom-[50%] left-[80%]',
-          props.isCompleted &&
+          localComplete &&
             'left-1/2 h-[300%] rounded-none bg-linear-to-tr from-lime-500 via-green-500 to-emerald-500 opacity-100'
         )}
       ></span>
@@ -181,7 +194,7 @@ export const HabitCard = (props: HabitCardProps) => {
                   onSuccess={() => setIsEditing(false)}
                   onRevert={() => {
                     setLocalComplete(false)
-                    notCompletedAnimation()
+                    revertCompletion()
                   }}
                 />
               </motion.div>
