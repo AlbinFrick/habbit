@@ -29,6 +29,41 @@ export const HabitCard = (props: HabitCardProps) => {
   const [localComplete, setLocalComplete] = useState(props.isCompleted)
   const compactView = useCompactMode()
 
+  const revertCompletion = useCallback(() => {
+    animate(
+      '#backdrop',
+      {
+        height: '0',
+        opacity: 0,
+        left: compactView ? '80%' : '50%',
+      },
+      { duration: 0.8 }
+    )
+    animate('#count', { rotate: 0, scale: 1 }, { duration: 0.3 })
+  }, [animate, compactView])
+
+  useEffect(() => {
+    if (props.reset()) revertCompletion()
+
+    if (compactView) {
+      animate(
+        scope.current,
+        {
+          height: '180px',
+        },
+        { duration: 0.5 }
+      )
+    } else {
+      animate(
+        scope.current,
+        {
+          height: '75vh',
+        },
+        { duration: 0.5 }
+      )
+    }
+  }, [compactView, scope, animate, props.reset, revertCompletion, props])
+
   const completedAnimation = () => {
     animate(
       '#backdrop',
@@ -79,23 +114,6 @@ export const HabitCard = (props: HabitCardProps) => {
     animate('#count', { rotate: 0, scale: 1 }, { duration: 0.3 })
   }
 
-  const revertCompletion = useCallback(() => {
-    animate(
-      '#backdrop',
-      {
-        height: '0',
-        opacity: 0,
-        left: compactView ? '80%' : '50%',
-      },
-      { duration: 0.8 }
-    )
-    animate('#count', { rotate: 0, scale: 1 }, { duration: 0.3 })
-  }, [animate, compactView])
-
-  useEffect(() => {
-    if (props.reset()) revertCompletion()
-  }, [props.reset, revertCompletion, props])
-
   const handleHoldStart = () => {
     completedAnimation()
     setHoldTimeout(
@@ -124,8 +142,7 @@ export const HabitCard = (props: HabitCardProps) => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        'relative w-full overflow-clip rounded-3xl bg-white shadow-lg',
-        compactView ? 'h-[180px]' : 'h-[75vh] min-h-[33rem] md:h-[44rem]'
+        'relative w-full overflow-clip rounded-3xl bg-white shadow-lg md:h-[44rem]'
       )}
     >
       <div
@@ -181,7 +198,7 @@ export const HabitCard = (props: HabitCardProps) => {
             compactView && 'w-full flex-row items-center justify-between'
           )}
         >
-          <div id="habit-text-container" className="text-text w-full space-y-4">
+          <div className="text-text w-full space-y-4">
             {isEditing && !compactView ? (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
