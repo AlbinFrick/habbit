@@ -9,7 +9,7 @@ export async function SiteHeader() {
   return (
     <header role="banner" className="bg-base w-screen">
       <div className="flex items-center justify-between p-2">
-        <Link href={siteConfig.url}>
+        <Link href="/">
           <h1 id="site-title" className="text-2xl font-black">
             {siteConfig.name}
           </h1>
