@@ -23,6 +23,7 @@ export function NotLoggedInStartPage() {
         <div className="flex flex-col items-center gap-3 md:items-start md:gap-0">
           <h1 className="text-text flex gap-4 font-serif text-7xl font-bold md:text-8xl">
             Habbit <Icons.Rabbit className="text-peach size-18 -rotate-12" />
+hello hello
           </h1>
           <p className="text-subtext0 text-xl md:text-2xl">
             Take <span className="text-mauve">control</span> over your life
