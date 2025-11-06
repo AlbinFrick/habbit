@@ -13,6 +13,7 @@ export default async function Home() {
     <HydrateClient>
       <SiteHeader />
       <main className="bg-base mx-auto flex min-h-[calc(100dvh-48px)] w-full max-w-7xl flex-col items-center">
+        <h1>Hello this is new</h1>
         {session ? (
           <>
             <HabitGrid />
